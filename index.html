@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TODO LIST</title>
+</head>
+<body>
+  <div id="content">
+    <form action="">
+    <label>Activity: <input type="text" id="activity" name="activity" value="foo Bar"></label>
+    <label>Importance:<input type="number" id="importance" name="importance" min="0" max="10" value="5"></label>
+    <label>Urgency<input type="number" id="urgency" name="urgency" min="0" max="10" value="5"></label>
+    <input type="button" value="Adicionar" id="add_button">
+    </form>
+    <table>
+      <tr>
+        <th>Activity</th>
+        <th>Added in</th>
+        <th>Importance</th>
+        <th>Urgency</th>
+        <th>Actions</th>
+      </tr>
+      <tr>
+        <td class="activity"></td>
+        <td class="date"></td>
+        <td class="importance"></td>
+        <td class="urgency"></td>
+        <td class="actions"></td>
+      </tr>
+    </table>
+  </div>
+  <canvas width="500" height="500"></canvas>
+  <script src="assets/js/jquery-3.1.1.min.js"></script>
+  <script src="assets/js/jquery.storageapi.min.js"></script>
+  <script src="assets/js/jcanvas.min.js"></script>
+  <script>
+$(document).ready(function(){
+  TodoList.init();
+});
+TodoList = {
+  ns: null,
+  ns_name: 'todo_list',
+  init: function() {
+    var self = this;
+    self.ns = $.initNamespaceStorage(self.ns_name);
+    $('#add_button').on('click', function(){
+      self.addActivity();
+    })
+  },
+  addActivity: function() {
+    var self = this;
+    var a = $('#activity').val();
+    var i = parseInt($('#importance').val());
+    var u = parseInt($('#urgency').val());
+    var d = Date.now();
+    var o = {"activity": a, "importance": i, "urgency": u, "date": d}
+    if(self.ns.localStorage.isEmpty(self.ns_name)) {
+      self.ns.localStorage.set(self.ns_name,[o]);
+    }   
+    else {
+      var cur = self.ns.localStorage.get(self.ns_name);
+      cur.push(o);
+      self.ns.localStorage.set(self.ns_name,cur)
+    }
+    self.drawActivities();
+  },
+  drawActivities: function() {
+    var self = this;
+    var activities = self.ns.localStorage.get(self.ns_name);
+    for(i in activities) {
+      a = activities[i]
+      console.log(a);
+      $('canvas').drawArc({
+      fillStyle: 'black',
+        x: a.urgency * 50, 
+        y: 500 - (a.importance * 50),
+        radius: 5
+      }).drawText({
+        fillStyle: '#333333',
+        strokeWidth: 2,
+        x: a.urgency * 50 + 15, 
+        y: 500 - (a.importance * 50) + 15,
+        fontSize: 12,
+        fontFamily: 'Verdana, sans-serif',
+        text: a.activity
+});
+    }
+  }
+};
+
+  </script>
+</body>
+</html>
